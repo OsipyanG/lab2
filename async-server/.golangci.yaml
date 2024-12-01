@@ -5,10 +5,11 @@ linters:
     - godox
     - exhaustruct
     - lll
+    - gofumpt
 linters-settings:
   tagliatelle:
     case:
       rules:
-        env: upperSnake
+        json: snake
 run:
   timeout: 1m
