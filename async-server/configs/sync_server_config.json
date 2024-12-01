@@ -1,0 +1,10 @@
+{
+    "host": "localhost",
+    "port": "8080",
+    "shutdown_timeout": "5s",
+    "max_connections": 10,
+    "read_timeout": "60s",
+    "write_timeout": "60s",
+    "log_level": "info",
+    "imitation_time": "2s"
+}
