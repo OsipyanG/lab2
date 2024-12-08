@@ -6,6 +6,7 @@ import (
 	"io"
 	"log/slog"
 	"net"
+	"os"
 	"strings"
 	"time"
 
@@ -37,8 +38,16 @@ func HandleConnection(conn net.Conn, cfg config.Config) {
 			slog.Info("Client closed connection", slog.String("addr", conn.RemoteAddr().String()))
 
 			break
-		} else if err != nil && !errors.Is(err, io.EOF) {
-			slog.Warn("Error processing message", slog.String("err", err.Error()), slog.String("addr", conn.RemoteAddr().String()))
+		} else if errors.Is(err, io.EOF) {
+			slog.Info("Client finished sending data", slog.String("addr", conn.RemoteAddr().String()))
+
+			break
+		} else if errors.Is(err, os.ErrDeadlineExceeded) {
+			slog.Info("Client disconnected or timed out", slog.String("addr", conn.RemoteAddr().String()))
+
+			break
+		} else if err != nil {
+			slog.Error("Connction error", slog.String("err", err.Error()))
 
 			break
 		}
@@ -74,8 +83,6 @@ func processConnection(conn net.Conn, cfg config.Config) error {
 
 	if message == "exit" {
 		slog.Info("Client requested to close connection", slog.String("addr", conn.RemoteAddr().String()))
-
-		conn.Close()
 
 		return ErrConnectionClosedByServer
 	}
