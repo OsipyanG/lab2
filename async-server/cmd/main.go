@@ -7,21 +7,18 @@ import (
 	"log/slog"
 	"net"
 	"os"
-	"time"
 )
 
 func main() {
 	cfg := config.MustLoad()
-	slog.Info("Config loaded", slog.String("config", fmt.Sprintf("%+v", cfg)))
 
-	err := setupLogging(cfg)
-	if err != nil {
+	if err := setupLogging(cfg); err != nil {
 		slog.Error("Error setting up logging", slog.String("err", err.Error()))
 
 		return
 	}
 
-	slog.Info("Logging setup")
+	slog.Info("Config loaded", slog.String("config", fmt.Sprintf("%+v", cfg)))
 
 	listener, err := net.Listen("tcp", net.JoinHostPort(cfg.Host, cfg.Port))
 	if err != nil {
@@ -30,7 +27,6 @@ func main() {
 		return
 	}
 	defer listener.Close()
-
 	slog.Info("Server started", slog.String("addr", listener.Addr().String()))
 
 	for {
@@ -39,19 +35,13 @@ func main() {
 			slog.Warn("Error accepting connection", slog.String("err", err.Error()))
 		}
 
-		slog.Info("Client connected", slog.String("addr", conn.RemoteAddr().String()))
-
-		err = conn.SetDeadline(time.Now().Add(cfg.ReadWriteTimeoutDuration))
-		if err != nil {
-			slog.Warn("Error setting read and write deadline", slog.String("err", err.Error()))
-		}
-
+		slog.Info("Client connected to the server", slog.String("addr", conn.RemoteAddr().String()))
 		go handler.HandleConnection(conn, *cfg)
 	}
 }
 
 func setupLogging(cfg *config.Config) error {
-	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{})))
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{})))
 
 	switch cfg.LogLevel {
 	case "error":

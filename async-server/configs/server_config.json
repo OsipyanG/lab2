@@ -1,8 +1,9 @@
 {
-    "host": "localhost",
+    "host": "server",
     "port": "8080",
 
-    "read_write_timeout": "5m",
+    "read_timeout": "10s",
+    "write_timeout": "10s",
 
     "log_level": "info",
     "imitation_time": "5s"

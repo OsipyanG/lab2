@@ -1,7 +1,14 @@
 services:
-  sync_server:
+  # server:
+  #   build:
+  #     context: ./sync-server
+  #     dockerfile: Dockerfile
+  #   networks:
+  #     - local_network
+
+  server:
     build:
-      context: ./sync-server
+      context: ./async-server
       dockerfile: Dockerfile
     networks:
       - local_network
@@ -15,7 +22,7 @@ services:
     networks:
       - local_network
     depends_on:
-      - sync_server
+      - server
 
 networks:
   local_network:

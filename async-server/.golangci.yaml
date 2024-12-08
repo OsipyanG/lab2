@@ -6,6 +6,7 @@ linters:
     - exhaustruct
     - lll
     - gofumpt
+    - wsl
 linters-settings:
   tagliatelle:
     case:

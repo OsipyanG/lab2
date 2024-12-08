@@ -35,6 +35,8 @@ func main() {
 		if err != nil {
 			slog.Warn("Error accepting connection", slog.String("err", err.Error()))
 		}
+
+		slog.Info("Client connected to the server", slog.String("addr", conn.RemoteAddr().String()))
 		handler.HandleConnection(conn, *cfg)
 	}
 }

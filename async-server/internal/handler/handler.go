@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"async-server/internal/config"
 	"errors"
 	"fmt"
 	"io"
@@ -8,8 +9,6 @@ import (
 	"net"
 	"strings"
 	"time"
-
-	"sync-server/internal/config"
 )
 
 const bufferSize = 4096
