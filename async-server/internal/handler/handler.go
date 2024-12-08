@@ -40,7 +40,7 @@ func HandleConnection(conn net.Conn, cfg config.Config) {
 
 			return
 		} else if err != nil {
-			slog.Error("Error sending message", slog.String("err", err.Error()), slog.String("addr", conn.RemoteAddr().String()))
+			slog.Warn("Error sending message", slog.String("err", err.Error()), slog.String("addr", conn.RemoteAddr().String()))
 
 			return
 		}
@@ -49,7 +49,7 @@ func HandleConnection(conn net.Conn, cfg config.Config) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		slog.Error("Error reading message", slog.String("err", err.Error()), slog.String("addr", conn.RemoteAddr().String()))
+		slog.Warn("Error reading message", slog.String("err", err.Error()), slog.String("addr", conn.RemoteAddr().String()))
 	}
 }
 

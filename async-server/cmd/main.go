@@ -37,19 +37,14 @@ func main() {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			slog.Error("Error accepting connection", slog.String("err", err.Error()))
+			slog.Warn("Error accepting connection", slog.String("err", err.Error()))
 		}
 
 		slog.Info("Client connected", slog.String("addr", conn.RemoteAddr().String()))
 
-		err = conn.SetReadDeadline(time.Now().Add(cfg.ReadTimeoutDuration))
+		err = conn.SetDeadline(time.Now().Add(cfg.ReadWriteTimeoutDuration))
 		if err != nil {
-			slog.Error("Error setting read deadline", slog.String("err", err.Error()))
-		}
-
-		err = conn.SetWriteDeadline(time.Now().Add(cfg.WriteTimeoutDuration))
-		if err != nil {
-			slog.Error("Error setting write deadline", slog.String("err", err.Error()))
+			slog.Warn("Error setting read and write deadline", slog.String("err", err.Error()))
 		}
 
 		go handler.HandleConnection(conn, *cfg)
@@ -64,7 +59,7 @@ func setupLogging(cfg *config.Config) error {
 		return fmt.Errorf("cannot create log file: %w", err)
 	}
 
-	slog.SetDefault(slog.New(slog.NewTextHandler(file, &slog.HandlerOptions{})))
+	slog.SetDefault(slog.New(slog.NewJSONHandler(file, &slog.HandlerOptions{})))
 
 	switch cfg.LogLevel {
 	case "error":

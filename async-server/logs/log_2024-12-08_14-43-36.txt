@@ -1,0 +1,4 @@
+time=2024-12-08T14:43:36.362+03:00 level=INFO msg="Logging setup"
+time=2024-12-08T14:43:36.365+03:00 level=INFO msg="Server started" addr=127.0.0.1:8080
+time=2024-12-08T14:43:36.950+03:00 level=INFO msg="Client connected" addr=127.0.0.1:58710
+time=2024-12-08T14:44:20.002+03:00 level=INFO msg="Received message" msg="Осипян Г. В. М3О-425Бк-21" addr=127.0.0.1:58710

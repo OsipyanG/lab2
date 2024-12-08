@@ -60,7 +60,7 @@ func setupLogging(cfg *config.Config) error {
 
 	fileBufferWriter := bufio.NewWriter(file)
 
-	slog.SetDefault(slog.New(slog.NewTextHandler(fileBufferWriter, &slog.HandlerOptions{})))
+	slog.SetDefault(slog.New(slog.NewJSONHandler(fileBufferWriter, &slog.HandlerOptions{})))
 
 	switch cfg.LogLevel {
 	case "error":

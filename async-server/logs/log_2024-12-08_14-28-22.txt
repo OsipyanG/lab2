@@ -1,0 +1,7 @@
+time=2024-12-08T14:28:22.212+03:00 level=INFO msg="Logging setup"
+time=2024-12-08T14:28:22.216+03:00 level=INFO msg="Server started" addr=127.0.0.1:8080
+time=2024-12-08T14:28:29.822+03:00 level=INFO msg="Client connected" addr=127.0.0.1:57241
+time=2024-12-08T14:28:32.724+03:00 level=INFO msg="Received message" msg="hello world" addr=127.0.0.1:57241
+time=2024-12-08T14:28:37.726+03:00 level=INFO msg="Imitated work" addr=127.0.0.1:57241
+time=2024-12-08T14:28:37.726+03:00 level=INFO msg="Sent message" msg="dlrow olleh\tСервер написан Осипяном Г. В. М3О-425Бк-21\n" addr=127.0.0.1:57241
+time=2024-12-08T14:28:44.450+03:00 level=INFO msg="Connection closed" addr=127.0.0.1:57241
