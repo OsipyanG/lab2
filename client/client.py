@@ -3,11 +3,12 @@ import time
 import json
 import structlog
 from pathlib import Path
-from datetime import datetime
 
 structlog.configure(
     processors=[
-        structlog.processors.TimeStamper(fmt="iso"),
+        # structlog.processors.TimeStamper(),
+        # structlog.processors.add_log_level,
+        structlog.processors.TimeStamper(fmt="%Y-%m-%dT%H:%M:%S", utc=False),
         structlog.processors.JSONRenderer()
     ],
     cache_logger_on_first_use=True
@@ -30,7 +31,6 @@ HOST = config["host"]
 PORT = config["port"]
 INTERVAL = config["interval"]
 
-# Логика клиента
 def main():
     try:
         logger.info("Starting client")
@@ -40,19 +40,17 @@ def main():
             logger.info("Connected to server", addr=f"{HOST}:{PORT}")
 
             while True:
-                message = "Осипян Г. В. М3О-425Бк-21"
+                message = "Сообщение от клиента" 
                 send_time = time.time()
                 client_socket.sendall(message.encode())
-                logger.info("Message sent", msg=message)
-
+                logger.info("Message sent")
                 response = client_socket.recv(1024).decode()
                 receive_time = time.time()
-                logger.info("Message received", msg=response)
+                logger.info("Message received", response)
 
                 time.sleep(INTERVAL)
-
     except Exception as e:
-        logger.error("An error occurred", error=str(e))
+        logger.error("Socket closed", error=str(e))
 
 if __name__ == "__main__":
     main()

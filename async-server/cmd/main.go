@@ -51,14 +51,7 @@ func main() {
 }
 
 func setupLogging(cfg *config.Config) error {
-	fileName := fmt.Sprintf("logs/log_%s.txt", time.Now().Format("2006-01-02_15-04-05"))
-
-	file, err := os.Create(fileName)
-	if err != nil {
-		return fmt.Errorf("cannot create log file: %w", err)
-	}
-
-	slog.SetDefault(slog.New(slog.NewJSONHandler(file, &slog.HandlerOptions{})))
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{})))
 
 	switch cfg.LogLevel {
 	case "error":

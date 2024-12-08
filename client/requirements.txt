@@ -1,0 +1,5 @@
+altgraph
+future
+macholib
+six
+structlog==24.4.0
