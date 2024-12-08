@@ -1,7 +1,0 @@
-{"time":"2024-12-08T14:44:24.460608+03:00","level":"INFO","msg":"Logging setup"}
-{"time":"2024-12-08T14:44:24.463533+03:00","level":"INFO","msg":"Server started","addr":"127.0.0.1:8080"}
-{"time":"2024-12-08T14:44:28.549459+03:00","level":"INFO","msg":"Client connected","addr":"127.0.0.1:58782"}
-{"time":"2024-12-08T14:45:28.551229+03:00","level":"INFO","msg":"Received message","msg":"Осипян Г. В. М3О-425Бк-21","addr":"127.0.0.1:58782"}
-{"time":"2024-12-08T14:45:33.552537+03:00","level":"INFO","msg":"Imitated work","addr":"127.0.0.1:58782"}
-{"time":"2024-12-08T14:45:33.552769+03:00","level":"INFO","msg":"Connection timeout","addr":"127.0.0.1:58782"}
-{"time":"2024-12-08T14:45:33.552928+03:00","level":"INFO","msg":"Connection closed","addr":"127.0.0.1:58782"}

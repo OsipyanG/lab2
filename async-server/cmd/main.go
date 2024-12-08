@@ -1,14 +1,13 @@
 package main
 
 import (
+	"async-server/internal/config"
+	"async-server/internal/handler"
 	"fmt"
 	"log/slog"
 	"net"
 	"os"
 	"time"
-
-	"sync-server/internal/config"
-	"sync-server/internal/handler"
 )
 
 func main() {

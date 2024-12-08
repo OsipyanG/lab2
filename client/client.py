@@ -5,12 +5,6 @@ import structlog
 from pathlib import Path
 from datetime import datetime
 
-LOG_FOLDER = Path("logs")
-LOG_FOLDER.mkdir(exist_ok=True)
-
-timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-LOG_FILE = LOG_FOLDER / f"log_{timestamp}.txt"
-
 structlog.configure(
     processors=[
         structlog.processors.TimeStamper(fmt="iso"),
@@ -35,16 +29,6 @@ with open(CONFIG_FILE) as f:
 HOST = config["host"]
 PORT = config["port"]
 INTERVAL = config["interval"]
-
-# Настройка вывода логов в файл
-file_handler = LOG_FILE.open("a", encoding="utf-8")
-structlog.configure_once(
-    processors=[
-        structlog.processors.TimeStamper(fmt="iso"),
-        structlog.processors.JSONRenderer()
-    ],
-    logger_factory=structlog.PrintLoggerFactory(file_handler)
-)
 
 # Логика клиента
 def main():

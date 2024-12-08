@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"sync-server/internal/config"
+	"async-server/internal/config"
 )
 
 func HandleConnection(conn net.Conn, cfg config.Config) {

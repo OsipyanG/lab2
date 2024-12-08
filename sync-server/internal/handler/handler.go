@@ -2,15 +2,25 @@ package handler
 
 import (
 	"bufio"
+	"errors"
 	"log/slog"
 	"net"
+	"os"
 	"strings"
-	"sync-server/internal/config"
 	"time"
+
+	"sync-server/internal/config"
 )
 
 func HandleConnection(conn net.Conn, cfg config.Config) {
-	defer conn.Close()
+	defer func() {
+		err := conn.Close()
+		if err != nil {
+			slog.Warn("Error closing connection", slog.String("err", err.Error()), slog.String("addr", conn.RemoteAddr().String()))
+		} else {
+			slog.Info("Connection closed", slog.String("addr", conn.RemoteAddr().String()))
+		}
+	}()
 
 	scanner := bufio.NewScanner(conn)
 	for scanner.Scan() {
@@ -25,8 +35,13 @@ func HandleConnection(conn net.Conn, cfg config.Config) {
 		slog.Info("Imitated work", slog.String("addr", conn.RemoteAddr().String()))
 
 		_, err := conn.Write([]byte(sentMsg))
-		if err != nil {
-			slog.Error("Error sending message", slog.String("err", err.Error()), slog.String("addr", conn.RemoteAddr().String()))
+		if err != nil && errors.Is(err, os.ErrDeadlineExceeded) {
+			slog.Info("Connection timeout", slog.String("addr", conn.RemoteAddr().String()))
+
+			return
+		} else if err != nil {
+			slog.Warn("Error sending message", slog.String("err", err.Error()), slog.String("addr", conn.RemoteAddr().String()))
+
 			return
 		}
 
@@ -34,7 +49,7 @@ func HandleConnection(conn net.Conn, cfg config.Config) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		slog.Error("Error reading message", slog.String("err", err.Error()), slog.String("addr", conn.RemoteAddr().String()))
+		slog.Warn("Error reading message", slog.String("err", err.Error()), slog.String("addr", conn.RemoteAddr().String()))
 	}
 }
 

@@ -1,14 +1,14 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"log/slog"
 	"net"
 	"os"
+	"time"
+
 	"sync-server/internal/config"
 	"sync-server/internal/handler"
-	"time"
 )
 
 func main() {
@@ -18,13 +18,16 @@ func main() {
 	err := setupLogging(cfg)
 	if err != nil {
 		slog.Error("Error setting up logging", slog.String("err", err.Error()))
+
 		return
 	}
+
 	slog.Info("Logging setup")
 
 	listener, err := net.Listen("tcp", net.JoinHostPort(cfg.Host, cfg.Port))
 	if err != nil {
 		slog.Error("Error starting server", slog.String("err", err.Error()))
+
 		return
 	}
 	defer listener.Close()
@@ -34,20 +37,18 @@ func main() {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			slog.Error("Error accepting connection", slog.String("err", err.Error()))
+			slog.Warn("Error accepting connection", slog.String("err", err.Error()))
 		}
-		defer conn.Close()
 
 		slog.Info("Client connected", slog.String("addr", conn.RemoteAddr().String()))
 
-		conn.SetReadDeadline(time.Now().Add(cfg.ReadTimeoutDuration))
-		conn.SetWriteDeadline(time.Now().Add(cfg.WriteTimeoutDuration))
+		err = conn.SetDeadline(time.Now().Add(cfg.ReadWriteTimeoutDuration))
+		if err != nil {
+			slog.Warn("Error setting read and write deadline", slog.String("err", err.Error()))
+		}
 
 		handler.HandleConnection(conn, *cfg)
-
-		slog.Info("Client disconnected", slog.String("addr", conn.RemoteAddr().String()))
 	}
-
 }
 
 func setupLogging(cfg *config.Config) error {
@@ -58,9 +59,7 @@ func setupLogging(cfg *config.Config) error {
 		return fmt.Errorf("cannot create log file: %w", err)
 	}
 
-	fileBufferWriter := bufio.NewWriter(file)
-
-	slog.SetDefault(slog.New(slog.NewJSONHandler(fileBufferWriter, &slog.HandlerOptions{})))
+	slog.SetDefault(slog.New(slog.NewJSONHandler(file, &slog.HandlerOptions{})))
 
 	switch cfg.LogLevel {
 	case "error":
@@ -71,7 +70,6 @@ func setupLogging(cfg *config.Config) error {
 		slog.SetLogLoggerLevel(slog.LevelInfo)
 	case "debug":
 		slog.SetLogLoggerLevel(slog.LevelDebug)
-
 	}
 
 	return nil
