@@ -38,7 +38,7 @@ func HandleConnection(conn net.Conn, cfg config.Config) {
 			}
 		}
 
-		receiveMsgBuilder.WriteString(string(buffer))
+		receiveMsgBuilder.WriteString(string(buffer[:n]))
 		if n < bufferSize {
 			break
 		}
@@ -52,7 +52,7 @@ func HandleConnection(conn net.Conn, cfg config.Config) {
 	time.Sleep(cfg.ImitationTimeDuration)
 	slog.Info("Imitated work", slog.String("addr", conn.RemoteAddr().String()))
 
-	_, err = conn.Write([]byte(sentMsg))
+	_, err := conn.Write([]byte(sentMsg))
 	if err != nil && errors.Is(err, os.ErrDeadlineExceeded) {
 		slog.Info("Connection timeout", slog.String("addr", conn.RemoteAddr().String()))
 
