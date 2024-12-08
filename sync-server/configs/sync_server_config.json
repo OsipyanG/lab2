@@ -2,8 +2,9 @@
     "host": "sync_server",
     "port": "8080",
 
-    "read_write_timeout": "5m",
+    "read_timeout": "1m",
+    "write_timeout": "1m",
 
     "log_level": "info",
-    "imitation_time": "10s"
+    "imitation_time": "5s"
 }

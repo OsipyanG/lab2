@@ -2,9 +2,10 @@ package handler
 
 import (
 	"errors"
+	"fmt"
+	"io"
 	"log/slog"
 	"net"
-	"os"
 	"strings"
 	"time"
 
@@ -13,57 +14,87 @@ import (
 
 const bufferSize = 4096
 
+var ErrConnectionClosedByServer = errors.New("connection closed by server")
+
 func HandleConnection(conn net.Conn, cfg config.Config) {
 	slog.Info("Handle connection", slog.String("addr", conn.RemoteAddr().String()))
 
 	defer func() {
-		err := conn.Close()
-		if err != nil {
+		if err := conn.Close(); err != nil {
 			slog.Warn("Error closing connection", slog.String("err", err.Error()), slog.String("addr", conn.RemoteAddr().String()))
 		} else {
 			slog.Info("Connection closed", slog.String("addr", conn.RemoteAddr().String()))
 		}
 	}()
 
+	for {
+		err := processConnection(conn, cfg)
+		if errors.Is(err, ErrConnectionClosedByServer) {
+			slog.Info("Server closed connection on request", slog.String("addr", conn.RemoteAddr().String()))
+
+			break
+		} else if errors.Is(err, net.ErrClosed) {
+			slog.Info("Client closed connection", slog.String("addr", conn.RemoteAddr().String()))
+
+			break
+		} else if err != nil && !errors.Is(err, io.EOF) {
+			slog.Warn("Error processing message", slog.String("err", err.Error()), slog.String("addr", conn.RemoteAddr().String()))
+
+			break
+		}
+	}
+}
+
+func processConnection(conn net.Conn, cfg config.Config) error {
 	receiveMsgBuilder := strings.Builder{}
 	buffer := make([]byte, bufferSize)
 
 	for {
+		conn.SetReadDeadline(time.Now().Add(cfg.ReadTimeoutDuration))
+
 		n, err := conn.Read(buffer)
 		if err != nil {
-			if errors.Is(err, os.ErrDeadlineExceeded) {
-				slog.Info("Connection timeout", slog.String("addr", conn.RemoteAddr().String()))
-
-				return
+			if errors.Is(err, net.ErrClosed) {
+				return net.ErrClosed
 			}
+
+			return fmt.Errorf("error reading from connection: %w", err)
 		}
 
 		receiveMsgBuilder.WriteString(string(buffer[:n]))
+
 		if n < bufferSize {
 			break
 		}
 	}
 
-	slog.Info("Received message", slog.String("msg", receiveMsgBuilder.String()), slog.String("addr", conn.RemoteAddr().String()))
+	message := strings.TrimSpace(receiveMsgBuilder.String())
 
-	reversedMsg := invertString(receiveMsgBuilder.String())
-	sentMsg := reversedMsg + "\nСервер написан Осипяном Г. В. М3О-425Бк-21\n"
+	slog.Info("Received message", slog.String("msg", message), slog.String("addr", conn.RemoteAddr().String()))
 
-	time.Sleep(cfg.ImitationTimeDuration)
-	slog.Info("Imitated work", slog.String("addr", conn.RemoteAddr().String()))
+	if message == "exit" {
+		slog.Info("Client requested to close connection", slog.String("addr", conn.RemoteAddr().String()))
 
-	_, err := conn.Write([]byte(sentMsg))
-	if err != nil && errors.Is(err, os.ErrDeadlineExceeded) {
-		slog.Info("Connection timeout", slog.String("addr", conn.RemoteAddr().String()))
+		conn.Close()
 
-		return
-	} else if err != nil {
-		slog.Warn("Error sending message", slog.String("err", err.Error()), slog.String("addr", conn.RemoteAddr().String()))
-
-		return
+		return ErrConnectionClosedByServer
 	}
 
-	slog.Info("Sent message", slog.String("msg", sentMsg), slog.String("addr", conn.RemoteAddr().String()))
+	response := invertString(message) + "\nСервер написан Осипяном Г. В. М3О-425Бк-21\n"
+
+	slog.Info("Imitating work", slog.String("addr", conn.RemoteAddr().String()))
+	time.Sleep(cfg.ImitationTimeDuration)
+
+	conn.SetWriteDeadline(time.Now().Add(cfg.WriteTimeoutDuration))
+
+	_, err := conn.Write([]byte(response))
+	if err != nil {
+		return fmt.Errorf("error writing to connection: %w", err)
+	}
+
+	slog.Info("Sent message", slog.String("msg", response), slog.String("addr", conn.RemoteAddr().String()))
+
+	return nil
 }
 
 func invertString(str string) string {

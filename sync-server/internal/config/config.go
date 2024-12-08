@@ -10,16 +10,18 @@ import (
 const configPath = "configs/sync_server_config.json"
 
 type Config struct {
-	Host string `env-default:"localhost" json:"host"`
-	Port string `env-default:"8080"      json:"port"`
+	Host string `json:"host"`
+	Port string `json:"port"`
 
-	ReadWriteTimeout string `env-default:"60s" json:"read_write_timeout"`
+	WriteTimeout string `json:"write_timeout"`
+	ReadTimeout  string `json:"read_timeout"`
 
-	LogLevel      string `env-default:"info" json:"log_level"`
-	ImitationTime string `env-default:"5s"   json:"imitation_time"`
+	LogLevel      string `json:"log_level"`
+	ImitationTime string `json:"imitation_time"`
 
-	ReadWriteTimeoutDuration time.Duration `json:"-"`
-	ImitationTimeDuration    time.Duration `json:"-"`
+	ReadTimeoutDuration   time.Duration `json:"-"`
+	WriteTimeoutDuration  time.Duration `json:"-"`
+	ImitationTimeDuration time.Duration `json:"-"`
 }
 
 func MustLoad() *Config {
@@ -35,9 +37,14 @@ func MustLoad() *Config {
 		log.Fatalf("cannot unmarshal config: %v", err)
 	}
 
-	cfg.ReadWriteTimeoutDuration, err = time.ParseDuration(cfg.ReadWriteTimeout)
+	cfg.ReadTimeoutDuration, err = time.ParseDuration(cfg.ReadTimeout)
 	if err != nil {
-		log.Fatalf("cannot parse ReadWriteTimeout, err=%s, ReadWriteTimeout=%s", err.Error(), cfg.ReadWriteTimeout)
+		log.Fatalf("cannot parse ReadTimeout, err=%s, ReadTimeout=%s", err.Error(), cfg.ReadTimeout)
+	}
+
+	cfg.WriteTimeoutDuration, err = time.ParseDuration(cfg.WriteTimeout)
+	if err != nil {
+		log.Fatalf("cannot parse WriteTimeout, err=%s, WriteTimeout=%s", err.Error(), cfg.WriteTimeout)
 	}
 
 	cfg.ImitationTimeDuration, err = time.ParseDuration(cfg.ImitationTime)
